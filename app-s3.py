@@ -1,8 +1,8 @@
 import os
 
+import aiohttp
 from dotenv import load_dotenv
 from fastapi import FastAPI
-from requests import get
 
 load_dotenv()
 
@@ -13,4 +13,6 @@ app = FastAPI()
 
 @app.get("/")
 async def root():
-    return get(url=APP_DB_URL).text
+    async with aiohttp.ClientSession() as session:
+        async with session.get(APP_DB_URL) as response:
+            return await response.text()
