@@ -14,4 +14,4 @@ sudo mysql --defaults-file=/etc/mysql/debian.cnf -e "CREATE USER '${DB_USER}'@'l
 sudo apt-get -y install python3-pip uvicorn
 pip3 install fastapi[all] mysql-connector-python python-dotenv
 
-uvicorn app-db:app --reload
+uvicorn app-db:app --host 0.0.0.0 --port 8000
