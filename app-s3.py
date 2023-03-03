@@ -1,7 +1,8 @@
+import io
 import os
-from pathlib import Path
 
 import aiohttp
+import boto3
 from aiohttp.client_exceptions import ClientConnectorError
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
@@ -10,7 +11,7 @@ from fastapi.responses import HTMLResponse
 load_dotenv()
 
 APP_DB_URL = os.getenv("APP_DB_URL")
-S3_PATH = os.getenv("S3_PATH", default=None)
+S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
 
 app = FastAPI()
 
@@ -20,8 +21,11 @@ async def create_file(request: Request):
     form = await request.form()
     filename = form["upload_file"].filename
     contents = await form["upload_file"].read()
-    with open(Path(S3_PATH) / filename, "wb") as f:
-        f.write(contents)
+
+    s3 = boto3.resource("s3")
+    bucket = s3.Bucket(name=S3_BUCKET_NAME)
+    bucket.upload_fileobj(io.BytesIO(contents), filename)
+
     return HTMLResponse(f"'{filename}' file uploaded successfully")
 
 
