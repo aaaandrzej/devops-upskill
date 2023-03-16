@@ -1,0 +1,8 @@
+#!/bin/bash
+sudo apt-get update
+git clone https://github.com/aaaandrzej/devops-upskill.git
+cd devops-upskill || exit
+echo "APP_DB_URL=http://${db_app_host}:8000/getNoOfRecs" >> .env
+echo "S3_BUCKET_NAME=${s3_bucket_name}" >> .env
+chmod 755 start_s3_app.sh
+./start_s3_app.sh

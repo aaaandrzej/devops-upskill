@@ -1,0 +1,1 @@
+# create access policy for s3 ec2

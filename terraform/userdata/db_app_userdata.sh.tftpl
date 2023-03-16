@@ -1,0 +1,10 @@
+#!/bin/bash
+git clone https://github.com/aaaandrzej/devops-upskill.git
+cd devops-upskill || exit
+echo "DB_HOST=${db_host}" >> .env
+echo "DB_PORT=${db_port}" >> .env
+echo "DB_USER=${db_user}" >> .env
+echo "DB_PASSWORD=${db_password}" >> .env
+echo "DB_NAME=${db_name}" >> .env
+chmod 755 start_db_app.sh
+./start_db_app.sh

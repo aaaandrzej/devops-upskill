@@ -41,7 +41,7 @@ resource "aws_internet_gateway" "gw" {
 
 resource "aws_eip" "eip" {
   count = local.az_count
-  vpc = true
+  vpc   = true
   tags = {
     Name  = join("-", [var.owner, "eip", ["a", "b"][count.index]])
     Owner = var.owner
@@ -49,7 +49,7 @@ resource "aws_eip" "eip" {
 }
 
 resource "aws_nat_gateway" "natgw" {
-  count = local.az_count
+  count             = local.az_count
   allocation_id     = aws_eip.eip[count.index].id
   subnet_id         = aws_subnet.public_subnets[count.index].id
   connectivity_type = "public"
@@ -63,7 +63,7 @@ resource "aws_nat_gateway" "natgw" {
 
 
 resource "aws_route_table" "public-rt" {
-  count = local.az_count
+  count  = local.az_count
   vpc_id = aws_vpc.main.id
 
   route {
@@ -77,7 +77,7 @@ resource "aws_route_table" "public-rt" {
 }
 
 resource "aws_route_table" "private-rt" {
-  count = local.az_count
+  count  = local.az_count
   vpc_id = aws_vpc.main.id
 
   route {
@@ -92,13 +92,13 @@ resource "aws_route_table" "private-rt" {
 }
 
 resource "aws_route_table_association" "public" {
-  count = local.az_count
+  count          = local.az_count
   subnet_id      = aws_subnet.public_subnets[count.index].id
   route_table_id = aws_route_table.public-rt[count.index].id
 }
 
 resource "aws_route_table_association" "private" {
-  count = local.az_count
+  count          = local.az_count
   subnet_id      = aws_subnet.private_subnets[count.index].id
   route_table_id = aws_route_table.private-rt[count.index].id
 }
@@ -114,68 +114,7 @@ resource "aws_vpc_endpoint" "s3" {
 }
 
 resource "aws_vpc_endpoint_route_table_association" "vpce_rt_assoc" {
-  count = local.az_count
+  count           = local.az_count
   route_table_id  = aws_route_table.private-rt[count.index].id
   vpc_endpoint_id = aws_vpc_endpoint.s3.id
-}
-
-resource "aws_s3_bucket" "main" {
-  bucket = "${var.owner}-s3-${random_pet.random_pet.id}"
-  tags = {
-    Name  = "${var.owner}-s3-${random_pet.random_pet.id}"
-    Owner = var.owner
-  }
-}
-
-resource "aws_s3_bucket_acl" "main" {
-  bucket = aws_s3_bucket.main.id
-  acl    = "private"
-}
-
-data "aws_ami" "ubuntu" {
-  most_recent = true
-
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  owners = ["099720109477"] # Canonical
-}
-
-# add security group allowing 22 from anywhere
-# add pem keypair
-
-
-resource "aws_instance" "bastion" {
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = "t3.micro"
-  subnet_id = aws_subnet.public_subnets[0].id
-  #  security_groups = []
-  #  iam_instance_profile = ""
-
-  tags = {
-    Name = "${var.owner}-bastion"
-    Owner = var.owner
-  }
-}
-
-resource "aws_instance" "private-ec2" {
-  count = local.az_count
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = "t3.micro"
-  subnet_id = aws_subnet.private_subnets[count.index].id
-  #  security_groups = []
-  #  iam_instance_profile = ""
-  #  user_data = ""
-
-  tags = {
-    Name  = join("-", [var.owner, "private-ec2", ["a", "b"][count.index]])
-    Owner = var.owner
-  }
 }
