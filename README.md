@@ -1,8 +1,8 @@
 # devops-upskill
 
-Two dummy APIs to practice AWS cloud services.
+## Two dummy APIs to practice AWS cloud services.
 
-Running locally/ manually:
+### Running locally/ manually:
 
 Example `.env` contents:
 ```
@@ -22,7 +22,7 @@ S3_BUCKET_NAME=mybucket
 
 `uvicorn app-s3:app --port 8001 --reload`
 
-Running with terraform:
+### Running with terraform:
 
 Example `terraforms.tfvars`:
 ```
