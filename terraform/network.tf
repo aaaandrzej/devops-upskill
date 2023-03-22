@@ -7,6 +7,7 @@ resource "aws_vpc" "main" {
   }
 }
 
+# extract to subnet module
 resource "aws_subnet" "public_subnets" {
   count                   = local.az_count
   vpc_id                  = aws_vpc.main.id
@@ -61,7 +62,7 @@ resource "aws_nat_gateway" "natgw" {
   depends_on = [aws_internet_gateway.gw]
 }
 
-
+# extract to a module
 resource "aws_route_table" "public-rt" {
   count  = local.az_count
   vpc_id = aws_vpc.main.id

@@ -13,9 +13,3 @@ data "aws_ami" "ubuntu" {
 
   owners = ["099720109477"] # Canonical
 }
-
-
-variable "instance_size" {
-  type    = string
-  default = "t2.micro"
-}

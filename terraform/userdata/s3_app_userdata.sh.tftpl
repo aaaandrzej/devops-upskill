@@ -1,8 +1,12 @@
 #!/bin/bash
-sudo apt-get update
 git clone https://github.com/aaaandrzej/devops-upskill.git
 cd devops-upskill || exit
-echo "APP_DB_URL=http://${db_app_host}:8000/getNoOfRecs" >> .env
-echo "S3_BUCKET_NAME=${s3_bucket_name}" >> .env
-chmod 755 start_s3_app.sh
-./start_s3_app.sh
+
+export APP_DB_URL=http://${db_app_host}:8000/getNoOfRecs
+export S3_BUCKET_NAME=${s3_bucket_name}
+
+sudo apt-get update
+sudo apt-get -y install python3-pip uvicorn
+pip3 install fastapi[all] boto3 python-dotenv aiohttp
+
+uvicorn app-s3:app --host 0.0.0.0 --port 8000

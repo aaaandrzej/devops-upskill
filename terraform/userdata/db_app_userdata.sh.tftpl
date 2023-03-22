@@ -1,10 +1,18 @@
 #!/bin/bash
 git clone https://github.com/aaaandrzej/devops-upskill.git
 cd devops-upskill || exit
-echo "DB_HOST=${db_host}" >> .env
-echo "DB_PORT=${db_port}" >> .env
-echo "DB_USER=${db_user}" >> .env
-echo "DB_PASSWORD=${db_password}" >> .env
-echo "DB_NAME=${db_name}" >> .env
-chmod 755 start_db_app.sh
-./start_db_app.sh
+
+export DB_HOST=${db_host}
+export DB_PORT=${db_port}
+export DB_USER=${db_user}
+export DB_PASSWORD=${db_password}
+export DB_NAME=${db_name}
+
+sudo apt-get update
+sudo apt-get -y install mysql-client python3-pip uvicorn
+pip3 install fastapi[all] mysql-connector-python python-dotenv
+
+# inject some dummy data into db after start
+mysql -h${db_host} -u${db_user} -p${db_password} -e "USE ${db_name};CREATE TABLE Users (UserID int, LastName varchar(255), FirstName varchar(255));INSERT INTO Users (UserID, LastName, FirstName) VALUES (1, 'Placek', 'Jacek'),(2, 'Niejadek', 'Tadek'),(3, 'Awaria', 'Maria');"
+
+uvicorn app-db:app --host 0.0.0.0 --port 8000

@@ -27,15 +27,17 @@ variable "db_user" {
 }
 
 variable "db_password" {
-  type = string
-}
-
-variable "db_port" {
-  type = number
+  type      = string
+  sensitive = true
 }
 
 variable "db_name" {
   type = string
+}
+
+variable "instance_size" {
+  type    = string
+  default = "t2.micro"
 }
 
 locals {
