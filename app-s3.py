@@ -38,8 +38,8 @@ async def root():
     except ClientConnectorError:
         response_from_db = None
 
-    if not response_from_db or response_from_db == "Internal Server Error":
-        db_response_message = "No connection to database"
+    if not response_from_db or response_from_db == "Internal Server Error" or "502 Bad Gateway" in response_from_db:
+        db_response_message = "Not yet connected to the database..."
     else:
         db_response_message = f"There are {response_from_db} entries in the database"
 
