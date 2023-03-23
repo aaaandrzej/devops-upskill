@@ -57,7 +57,7 @@ resource "aws_security_group" "db_app" {
 }
 
 resource "aws_security_group" "s3_app" {
-  description = "Allow 8000 inbound traffic from anywhere (temp!) and SSH from bastion"
+  description = "Allow 8000 inbound traffic from external load balancer and SSH from bastion"
   vpc_id      = aws_vpc.main.id
 
   ingress {
@@ -69,11 +69,11 @@ resource "aws_security_group" "s3_app" {
   }
 
   ingress {
-    description = "8000 from anywhere (temp!)"
-    from_port   = 8000
-    to_port     = 8000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    description     = "8000 from external load balancer"
+    from_port       = 8000
+    to_port         = 8000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.external_lb.id]
   }
 
   egress {
@@ -133,6 +133,30 @@ resource "aws_security_group" "db_lb" {
   }
   tags = {
     Name  = "${var.owner}-db-lg-sg"
+    Owner = var.owner
+  }
+}
+
+
+resource "aws_security_group" "external_lb" {
+  description = "Allow 80 inbound traffic from anywhere"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description = "80 from anywhere"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = {
+    Name  = "${var.owner}-external-lg-sg"
     Owner = var.owner
   }
 }
