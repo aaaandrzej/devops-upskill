@@ -29,10 +29,6 @@ Example `terraforms.tfvars`:
 owner              = "me"
 region             = "us-west-2"
 availability_zones = ["us-west-2a", "us-west-2b"]
-cidr_blocks = {
-  public  = ["10.0.0.0/24", "10.0.1.0/24"]
-  private = ["10.0.16.0/20", "10.0.32.0/20"]
-}
 db_user     = "user"
 db_password = "pass"
 db_name     = "USERS"

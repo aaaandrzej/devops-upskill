@@ -27,13 +27,6 @@ resource "aws_lb_target_group_attachment" "db_apps" {
   port             = 8000
 }
 
-resource "aws_lb_target_group_attachment" "external" {
-  count            = local.az_count
-  target_group_arn = aws_lb_target_group.external.arn
-  target_id        = aws_instance.s3_app[count.index].id
-  port             = 8000
-}
-
 resource "aws_lb" "db_apps" {
   name               = "db-lb"
   internal           = true

@@ -8,6 +8,10 @@ variable "availability_zones" {
 
 variable "cidr_blocks" {
   type = map(list(string))
+  default = {
+    public  = ["10.0.0.0/24", "10.0.1.0/24"]
+    private = ["10.0.16.0/20", "10.0.32.0/20"]
+  }
 }
 
 variable "scope" {
