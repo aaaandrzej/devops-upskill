@@ -34,4 +34,6 @@ db_password = "pass"
 db_name     = "USERS"
 ```
 
+`cd terraform`
+
 `terraform apply`
