@@ -32,6 +32,16 @@ resource "aws_subnet" "private_subnets" {
   }
 }
 
+resource "aws_db_subnet_group" "default" {
+  name       = "main"
+  subnet_ids = aws_subnet.private_subnets[*].id
+
+  tags = {
+    Name  = "${var.owner}-private_subnet_group"
+    Owner = var.owner
+  }
+}
+
 resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.main.id
   tags = {
