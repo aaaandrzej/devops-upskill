@@ -1,45 +1,55 @@
+module "networking" {
+  source             = "./networking"
+  region             = var.region
+  availability_zones = var.availability_zones
+  owner              = var.owner
+}
+
 module "database" {
-  source      = "./database"
-  db_name     = var.db_name
-  db_user     = var.db_user
-  db_password = var.db_password
-  #  db_subnet_group_name   = module.networking.db_subnet_group_name[0]
-  #  vpc_security_group_ids = [module.networking.db_security_group]
-  vpc_security_group_ids = [aws_security_group.db.id]
-  db_subnet_group_name   = aws_db_subnet_group.default.name
+  source                 = "./database"
+  db_name                = var.db_name
+  db_user                = var.db_user
+  db_password            = var.db_password
+  vpc_security_group_ids = [module.networking.db_sg_id]
+  db_subnet_group_name   = module.networking.aws_db_subnet_group_name
   owner                  = var.owner
+}
+
+module "storage" {
+  source = "./storage"
+  owner  = var.owner
 }
 
 module "loadbalancing" {
   source                = "./loadbalancing"
-  vpc_id                = aws_vpc.main.id
-  db_apps_tg_count      = local.az_count
+  vpc_id                = module.networking.vpc_id
+  db_apps_tg_count      = module.networking.az_count
   db_apps_tg_target_ids = module.compute.db_apps_ids
-  db_apps_sg            = aws_security_group.db_lb.id
-  external_lb_sg        = aws_security_group.external_lb.id
-  private_subnets       = aws_subnet.private_subnets[*].id
-  public_subnets        = aws_subnet.public_subnets[*].id
+  db_lb_sg              = module.networking.db_lb_sg_id
+  external_lb_sg        = module.networking.ext_lb_sg_id
+  private_subnets       = module.networking.private_subnets_ids
+  public_subnets        = module.networking.public_subnets_ids
   owner                 = var.owner
 }
 
 module "compute" {
   source          = "./compute"
   instance_size   = var.instance_size
-  public_subnets  = aws_subnet.public_subnets[*].id
-  private_subnets = aws_subnet.private_subnets[*].id
+  private_subnets = module.networking.private_subnets_ids
+  public_subnets  = module.networking.public_subnets_ids
   key_name        = aws_key_pair.kp.id
   owner           = var.owner
 
   # bastions
   no_of_bastions = 1
-  bastion_sg     = aws_security_group.public.id
+  bastion_sg     = module.networking.public_sg_id
 
   # db apps
-  no_of_db_apps     = local.az_count
+  no_of_db_apps     = module.networking.az_count
   db_app_dependency = module.database.db
-  db_app_sg         = aws_security_group.db_app.id
+  db_app_sg         = module.networking.db_app_sg_id
   db_app_user_data = templatefile(
-    "${path.module}/userdata/db_app_userdata.sh.tftpl",
+    "${path.root}/userdata/db_app_userdata.sh.tftpl",
     {
       db_host     = module.database.db_address
       db_port     = module.database.db_port
@@ -51,15 +61,15 @@ module "compute" {
 
   # s3 apps
   no_of_s3_apps        = [2, 4, 6]
-  s3_app_sg            = aws_security_group.s3_app.id
+  s3_app_sg            = module.networking.s3_app_sg_id
   iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
   s3_tg_arn            = module.loadbalancing.s3_tg_arn
   s3_app_user_data = base64encode(
     templatefile(
-      "${path.module}/userdata/s3_app_userdata.sh.tftpl",
+      "${path.root}/userdata/s3_app_userdata.sh.tftpl",
       {
         db_app_host    = module.loadbalancing.db_lb_host
-        s3_bucket_name = aws_s3_bucket.main.id
+        s3_bucket_name = module.storage.bucket_name
       }
     )
   )

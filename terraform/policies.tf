@@ -32,7 +32,7 @@ resource "aws_iam_role_policy" "ec2_iam_role_policy" {
           "s3:PutObject",
         ]
         Effect   = "Allow"
-        Resource = "${aws_s3_bucket.main.arn}/*"
+        Resource = "${module.storage.bucket_arn}/*"
       },
     ]
   })

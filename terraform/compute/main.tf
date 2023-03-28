@@ -58,7 +58,7 @@ resource "aws_instance" "db_app" {
   count           = var.no_of_db_apps
   ami             = data.aws_ami.ubuntu.id
   instance_type   = var.instance_size
-  subnet_id       = var.public_subnets[count.index]
+  subnet_id       = var.private_subnets[count.index]
   security_groups = [var.db_app_sg]
   key_name        = var.key_name
   user_data       = var.db_app_user_data

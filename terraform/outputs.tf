@@ -4,7 +4,7 @@ output "bastions_ip_addresses" {
 }
 
 output "bucket-name" {
-  value       = aws_s3_bucket.main.id
+  value       = module.storage.bucket_name
   description = "The name of the bucket"
 }
 

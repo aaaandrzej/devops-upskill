@@ -31,7 +31,7 @@ resource "aws_lb" "db_apps" {
   name               = "db-lb"
   internal           = true
   load_balancer_type = "application"
-  security_groups    = [var.db_apps_sg]
+  security_groups    = [var.db_lb_sg]
   subnets            = var.private_subnets
   tags = {
     Name  = "${var.owner}-db-lb"
