@@ -1,0 +1,32 @@
+name: 'ci-terraform-apply-from-main'
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: do-terraform-destroy-aws-from-main-development
+
+jobs:
+  terraform-destroy-aws-from-main-development-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        ref: 'main'
+        fetch-depth: '1'
+    - name: 'print dependencies'
+      run: |
+        ./ci-print-dependencies.sh
+    - name: 'ci terraform destroy'
+      timeout-minutes: 20
+      env:
+        TF_VAR_owner: ${{ secrets.Owner }}
+        TF_VAR_db_name: ${{ secrets.DatabaseName }}
+        TF_VAR_db_user: ${{ secrets.DatabaseUser }}
+        TF_VAR_db_password: ${{ secrets.DatabasePassword }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AwsAccessKeyId }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AwsSecretAccessKey }}
+        AWS_DEFAULT_REGION: 'us-west-2'
+        AWS_DEFAULT_OUTPUT: 'json'
+      run: |
+        ./ci-terraform-destroy.sh
