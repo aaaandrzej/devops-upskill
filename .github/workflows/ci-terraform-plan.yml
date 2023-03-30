@@ -1,7 +1,9 @@
-name: 'ci-terraform-destroy-from-main'
+name: 'ci-terraform-plan'
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - '*'
 
 jobs:
   terraform-destroy-aws-from-main:
@@ -12,7 +14,7 @@ jobs:
       with:
         ref: 'main'
         fetch-depth: '1'
-    - name: 'Run terraform destroy'
+    - name: 'Run terraform plan'
       timeout-minutes: 20
       env:
         TF_VAR_owner: ${{ secrets.Owner }}
@@ -24,4 +26,4 @@ jobs:
         AWS_DEFAULT_REGION: 'us-west-2'
         AWS_DEFAULT_OUTPUT: 'json'
       run: |
-        ./ci-terraform-destroy.sh
+        ./ci-terraform-plan.sh
