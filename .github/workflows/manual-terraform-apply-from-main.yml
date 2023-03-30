@@ -5,6 +5,7 @@ on:
 
 
 jobs:
+  manual-terraform-apply-from-main:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
