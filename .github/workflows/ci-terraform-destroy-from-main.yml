@@ -12,9 +12,6 @@ jobs:
       with:
         ref: 'main'
         fetch-depth: '1'
-    - name: 'Print dependencies'
-      run: |
-        ./ci-print-dependencies.sh
     - name: 'Run terraform destroy'
       timeout-minutes: 20
       env:
