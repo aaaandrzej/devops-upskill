@@ -1,4 +1,4 @@
-name: 'ci-terraform-destroy-from-main'
+name: 'manual-terraform-destroy-from-main'
 
 on:
   workflow_dispatch:
