@@ -1,21 +1,10 @@
-name: 'ci-terraform-apply-from-main'
+name: 'terraform-destroy'
 
 on:
   workflow_dispatch:
-    inputs:
-      double_check:
-        description: 'Are you sure?'
-        type: boolean
-        required: true
-
-  pull_request:
-    types:
-      - 'closed'
-
 
 jobs:
-  ci-terraform-apply-from-main:
-    if: github.event.pull_request.merged || github.event.inputs.double_check
+  terraform-destroy-aws-from-main:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -23,7 +12,7 @@ jobs:
       with:
         ref: 'main'
         fetch-depth: '1'
-    - name: 'Run terraform apply'
+    - name: 'Run terraform destroy'
       timeout-minutes: 20
       env:
         TF_VAR_owner: ${{ secrets.Owner }}
@@ -35,4 +24,4 @@ jobs:
         AWS_DEFAULT_REGION: 'us-west-2'
         AWS_DEFAULT_OUTPUT: 'json'
       run: |
-        ./ci-terraform-apply.sh
+        ./ci-terraform-destroy.sh
