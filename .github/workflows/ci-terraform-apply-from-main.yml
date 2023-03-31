@@ -2,6 +2,12 @@ name: 'ci-terraform-apply-from-main'
 
 on:
   workflow_dispatch:
+    inputs:
+      double_check:
+        description: 'Are you sure?'
+        type: bool
+        required: true
+
   pull_request:
     types:
       - 'closed'
@@ -9,7 +15,7 @@ on:
 
 jobs:
   ci-terraform-apply-from-main:
-    if: github.event.pull_request.merged
+    if: github.event.pull_request.merged || github.event.inputs.double_check
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
