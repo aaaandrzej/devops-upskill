@@ -13,4 +13,5 @@ variable "public_subnets" {}
 variable "private_subnets" {}
 variable "bastion_sg" {}
 variable "s3_tg_arn" {}
+variable "db_tg_arn" {}
 variable "owner" {}

@@ -20,13 +20,6 @@ resource "aws_lb_target_group" "external" {
   }
 }
 
-resource "aws_lb_target_group_attachment" "db_apps" {
-  count            = var.db_apps_tg_count
-  target_group_arn = aws_lb_target_group.db_apps.arn
-  target_id        = var.db_apps_tg_target_ids[count.index]
-  port             = 8000
-}
-
 resource "aws_lb" "db_apps" {
   name               = "db-lb"
   internal           = true

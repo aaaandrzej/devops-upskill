@@ -10,7 +10,7 @@ terraform {
     bucket = "aszulc-tfstate"
     key    = "dev.tfstate"
     region = "us-west-2"
-}
+  }
 }
 
 provider "aws" {

@@ -21,15 +21,14 @@ module "storage" {
 }
 
 module "loadbalancing" {
-  source                = "./loadbalancing"
-  vpc_id                = module.networking.vpc_id
-  db_apps_tg_count      = module.networking.az_count
-  db_apps_tg_target_ids = module.compute.db_apps_ids
-  db_lb_sg              = module.networking.db_lb_sg_id
-  external_lb_sg        = module.networking.ext_lb_sg_id
-  private_subnets       = module.networking.private_subnets_ids
-  public_subnets        = module.networking.public_subnets_ids
-  owner                 = var.owner
+  source           = "./loadbalancing"
+  vpc_id           = module.networking.vpc_id
+  db_apps_tg_count = module.networking.az_count
+  db_lb_sg         = module.networking.db_lb_sg_id
+  external_lb_sg   = module.networking.ext_lb_sg_id
+  private_subnets  = module.networking.private_subnets_ids
+  public_subnets   = module.networking.public_subnets_ids
+  owner            = var.owner
 }
 
 module "compute" {
@@ -48,15 +47,18 @@ module "compute" {
   no_of_db_apps     = module.networking.az_count
   db_app_dependency = module.database.db
   db_app_sg         = module.networking.db_app_sg_id
-  db_app_user_data = templatefile(
-    "${path.root}/userdata/db_app_userdata.sh.tftpl",
-    {
-      db_host     = module.database.db_address
-      db_port     = module.database.db_port
-      db_user     = var.db_user
-      db_password = var.db_password
-      db_name     = var.db_name
-    }
+  db_tg_arn         = module.loadbalancing.db_tg_arn
+  db_app_user_data = base64encode(
+    templatefile(
+      "${path.root}/userdata/db_app_userdata.sh.tftpl",
+      {
+        db_host     = module.database.db_address
+        db_port     = module.database.db_port
+        db_user     = var.db_user
+        db_password = var.db_password
+        db_name     = var.db_name
+      }
+    )
   )
 
   # s3 apps

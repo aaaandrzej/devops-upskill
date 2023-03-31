@@ -40,7 +40,7 @@ resource "aws_launch_template" "s3_app" {
   }
 }
 
-resource "aws_autoscaling_group" "main" {
+resource "aws_autoscaling_group" "s3_apps" {
   vpc_zone_identifier = var.private_subnets
   target_group_arns   = [var.s3_tg_arn]
   desired_capacity    = var.no_of_s3_apps[1]
@@ -53,21 +53,43 @@ resource "aws_autoscaling_group" "main" {
   }
 }
 
-resource "aws_instance" "db_app" {
-  depends_on      = [var.db_app_dependency]
-  count           = var.no_of_db_apps
-  ami             = data.aws_ami.ubuntu.id
-  instance_type   = var.instance_size
-  subnet_id       = var.private_subnets[count.index]
-  security_groups = [var.db_app_sg]
-  key_name        = var.key_name
-  user_data       = var.db_app_user_data
+resource "aws_launch_template" "db_app" {
+  name                   = "db_app_lt"
+  image_id               = data.aws_ami.ubuntu.id
+  key_name               = var.key_name
+  instance_type          = var.instance_size
+  vpc_security_group_ids = [var.db_app_sg]
 
+  user_data = var.db_app_user_data
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name  = "${var.owner}-db-app-instance"
+      Owner = var.owner
+    }
+  }
   tags = {
-    Name  = join("-", [var.owner, "db-app", (count.index + 1)])
+    Name  = "${var.owner}-db-app-lt"
     Owner = var.owner
   }
 }
+
+
+resource "aws_autoscaling_group" "db_apps" {
+  depends_on          = [var.db_app_dependency]
+  vpc_zone_identifier = var.private_subnets
+  target_group_arns   = [var.db_tg_arn]
+  desired_capacity    = var.no_of_db_apps
+  max_size            = var.no_of_db_apps
+  min_size            = var.no_of_db_apps
+
+  launch_template {
+    id      = aws_launch_template.db_app.id
+    version = "$Latest"
+  }
+}
+
 
 
 resource "aws_instance" "bastion" {
