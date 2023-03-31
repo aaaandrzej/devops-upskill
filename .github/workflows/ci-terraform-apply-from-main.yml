@@ -5,7 +5,7 @@ on:
     inputs:
       double_check:
         description: 'Are you sure?'
-        type: bool
+        type: boolean
         required: true
 
   pull_request:
