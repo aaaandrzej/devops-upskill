@@ -1,5 +1,5 @@
 output "bastions_ip_addresses" {
-  value       = module.compute.bastion_public_ip
+  value       = aws_instance.bastion[*].public_ip
   description = "The IP addresses of the bastions"
 }
 
@@ -9,6 +9,6 @@ output "bucket-name" {
 }
 
 output "external-lb-address" {
-  value       = "http://${module.loadbalancing.external_lb_dns_name}/"
+  value       = "http://${module.loadbalancing-external.dns_name}/"
   description = "The address of external load balancer"
 }

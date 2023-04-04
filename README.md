@@ -28,7 +28,6 @@ Example `terraforms.tfvars`:
 ```
 owner              = "me"
 region             = "us-west-2"
-availability_zones = ["us-west-2a", "us-west-2b"]
 db_user     = "user"
 db_password = "pass"
 db_name     = "USERS"

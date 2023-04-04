@@ -1,17 +1,19 @@
-variable "instance_size" {}
+variable "instance_size" {
+  type = string
+  validation {
+    condition     = length(var.instance_size) > 4 && startswith(var.instance_size, "t")
+    error_message = "The instance_size value must be at least 4 characters long and start with t."
+  }
+}
 variable "key_name" {}
-variable "s3_app_sg" {}
-variable "db_app_sg" {}
+variable "app_sg" {}
+variable "app_name" {}
 variable "iam_instance_profile" {}
-variable "s3_app_user_data" {}
-variable "db_app_user_data" {}
-variable "no_of_bastions" {}
-variable "no_of_db_apps" {}
-variable "no_of_s3_apps" {}
-variable "db_app_dependency" {}
-variable "public_subnets" {}
-variable "private_subnets" {}
-variable "bastion_sg" {}
-variable "s3_tg_arn" {}
-variable "db_tg_arn" {}
+variable "user_data" {}
+variable "desired_capacity" { type = number }
+variable "max_size" { type = number }
+variable "min_size" { type = number }
+variable "app_dependency" {}
+variable "subnets" {}
+variable "tg_arn" {}
 variable "owner" {}

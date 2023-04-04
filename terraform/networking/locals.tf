@@ -1,3 +1,3 @@
 locals {
-  az_count = length(var.availability_zones)
+  az_count = length(data.aws_availability_zones.with.names)
 }

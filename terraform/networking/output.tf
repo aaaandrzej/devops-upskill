@@ -7,11 +7,11 @@ output "az_count" {
 }
 
 output "private_subnets_ids" {
-  value = aws_subnet.private_subnets[*].id
+  value = [for k, v in aws_subnet.private_subnets : v.id]
 }
 
 output "public_subnets_ids" {
-  value = aws_subnet.public_subnets[*].id
+  value = [for k, v in aws_subnet.public_subnets : v.id]
 }
 
 output "aws_db_subnet_group_name" {

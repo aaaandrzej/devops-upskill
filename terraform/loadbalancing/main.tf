@@ -1,73 +1,36 @@
-resource "aws_lb_target_group" "db_apps" {
-  name     = "db-lb-tg"
+resource "aws_lb_target_group" "main" {
+  name     = "${var.name}-tg"
   port     = 8000
   protocol = "HTTP"
   vpc_id   = var.vpc_id
   tags = {
-    Name  = "${var.owner}-db-lb-tg"
+    Name  = "${var.owner}-${var.name}-tg"
     Owner = var.owner
   }
 }
 
-resource "aws_lb_target_group" "external" {
-  name     = "external-lb-tg"
-  port     = 8000
-  protocol = "HTTP"
-  vpc_id   = var.vpc_id
-  tags = {
-    Name  = "${var.owner}-external-lb-tg"
-    Owner = var.owner
-  }
-}
-
-resource "aws_lb" "db_apps" {
-  name               = "db-lb"
-  internal           = true
+resource "aws_lb" "main" {
+  name               = var.name
+  internal           = var.internal
   load_balancer_type = "application"
-  security_groups    = [var.db_lb_sg]
-  subnets            = var.private_subnets
+  security_groups    = [var.security_group]
+  subnets            = var.subnets
   tags = {
-    Name  = "${var.owner}-db-lb"
+    Name  = "${var.owner}-${var.name}"
     Owner = var.owner
   }
 }
 
-resource "aws_lb" "external" {
-  name               = "external-lb"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [var.external_lb_sg]
-  subnets            = var.public_subnets
-  tags = {
-    Name  = "${var.owner}-external-lb"
-    Owner = var.owner
-  }
-}
-
-resource "aws_lb_listener" "db_apps" {
-  load_balancer_arn = aws_lb.db_apps.arn
-  port              = "8000"
+resource "aws_lb_listener" "main" {
+  load_balancer_arn = aws_lb.main.arn
+  port              = var.port
   protocol          = "HTTP"
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.db_apps.arn
+    target_group_arn = aws_lb_target_group.main.arn
   }
   tags = {
-    Name  = "${var.owner}-db-lb-listener"
-    Owner = var.owner
-  }
-}
-
-resource "aws_lb_listener" "external" {
-  load_balancer_arn = aws_lb.external.arn
-  port              = "80"
-  protocol          = "HTTP"
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.external.arn
-  }
-  tags = {
-    Name  = "${var.owner}-external-lb-listener"
+    Name  = "${var.owner}-${var.name}-listener"
     Owner = var.owner
   }
 }

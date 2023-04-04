@@ -1,3 +1,8 @@
+data "aws_availability_zones" "with" {
+  state         = "available"
+  exclude_names = ["${var.region}d", "${var.region}e"]
+}
+
 resource "aws_vpc" "main" {
   cidr_block       = var.vpc_cidr_block
   instance_tenancy = "default"
@@ -8,32 +13,32 @@ resource "aws_vpc" "main" {
 }
 
 resource "aws_subnet" "public_subnets" {
-  count                   = local.az_count
+  for_each                = toset(data.aws_availability_zones.with.names)
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = lookup(var.cidr_blocks, var.scope.public)[count.index]
-  availability_zone       = var.availability_zones[count.index]
+  cidr_block              = lookup(var.cidr_blocks, var.scope.public)[index(data.aws_availability_zones.with.names, each.key)]
+  availability_zone       = each.key
   map_public_ip_on_launch = true
   tags = {
-    Name  = join("-", [var.owner, "public-subnet", ["a", "b"][count.index]])
+    Name  = join("-", [var.owner, "public-subnet", each.key])
     Owner = var.owner
   }
 }
 
 resource "aws_subnet" "private_subnets" {
-  count                   = local.az_count
+  for_each                = toset(data.aws_availability_zones.with.names)
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = lookup(var.cidr_blocks, var.scope.private)[count.index]
-  availability_zone       = var.availability_zones[count.index]
+  cidr_block              = lookup(var.cidr_blocks, var.scope.private)[index(data.aws_availability_zones.with.names, each.key)]
+  availability_zone       = each.key
   map_public_ip_on_launch = false
   tags = {
-    Name  = join("-", [var.owner, "private-subnet", ["a", "b"][count.index]])
+    Name  = join("-", [var.owner, "private-subnet", each.key])
     Owner = var.owner
   }
 }
 
 resource "aws_db_subnet_group" "default" {
   name       = "main"
-  subnet_ids = aws_subnet.private_subnets[*].id
+  subnet_ids = [for k, v in aws_subnet.private_subnets : v.id]
 
   tags = {
     Name  = "${var.owner}-private-subnet-group"
@@ -50,65 +55,65 @@ resource "aws_internet_gateway" "gw" {
 }
 
 resource "aws_eip" "eip" {
-  count = local.az_count
-  vpc   = true
+  for_each = toset(data.aws_availability_zones.with.names)
+  vpc      = true
   tags = {
-    Name  = join("-", [var.owner, "eip", ["a", "b"][count.index]])
+    Name  = join("-", [var.owner, "eip", each.key])
     Owner = var.owner
   }
 }
 
 resource "aws_nat_gateway" "natgw" {
-  count             = local.az_count
-  allocation_id     = aws_eip.eip[count.index].id
-  subnet_id         = aws_subnet.public_subnets[count.index].id
+  for_each          = toset(data.aws_availability_zones.with.names)
+  allocation_id     = aws_eip.eip[each.key].id
+  subnet_id         = aws_subnet.public_subnets[each.key].id
   connectivity_type = "public"
   tags = {
-    Name  = join("-", [var.owner, "natgw", ["a", "b"][count.index]])
+    Name  = join("-", [var.owner, "natgw", each.key])
     Owner = var.owner
   }
   depends_on = [aws_internet_gateway.gw]
 }
 
 resource "aws_route_table" "public-rt" {
-  count  = local.az_count
-  vpc_id = aws_vpc.main.id
+  for_each = toset(data.aws_availability_zones.with.names)
+  vpc_id   = aws_vpc.main.id
 
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.gw.id
   }
   tags = {
-    Name  = join("-", [var.owner, "public-rt", ["a", "b"][count.index]])
+    Name  = join("-", [var.owner, "public-rt", each.key])
     Owner = var.owner
   }
 }
 
 resource "aws_route_table" "private-rt" {
-  count  = local.az_count
-  vpc_id = aws_vpc.main.id
+  for_each = toset(data.aws_availability_zones.with.names)
+  vpc_id   = aws_vpc.main.id
 
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.natgw[count.index].id
+    nat_gateway_id = aws_nat_gateway.natgw[each.key].id
   }
 
   tags = {
-    Name  = join("-", [var.owner, "private-rt", ["a", "b"][count.index]])
+    Name  = join("-", [var.owner, "private-rt", each.key])
     Owner = var.owner
   }
 }
 
 resource "aws_route_table_association" "public" {
-  count          = local.az_count
-  subnet_id      = aws_subnet.public_subnets[count.index].id
-  route_table_id = aws_route_table.public-rt[count.index].id
+  for_each       = toset(data.aws_availability_zones.with.names)
+  subnet_id      = aws_subnet.public_subnets[each.key].id
+  route_table_id = aws_route_table.public-rt[each.key].id
 }
 
 resource "aws_route_table_association" "private" {
-  count          = local.az_count
-  subnet_id      = aws_subnet.private_subnets[count.index].id
-  route_table_id = aws_route_table.private-rt[count.index].id
+  for_each       = toset(data.aws_availability_zones.with.names)
+  subnet_id      = aws_subnet.private_subnets[each.key].id
+  route_table_id = aws_route_table.private-rt[each.key].id
 }
 
 resource "aws_vpc_endpoint" "s3" {
@@ -122,13 +127,13 @@ resource "aws_vpc_endpoint" "s3" {
 }
 
 resource "aws_vpc_endpoint_route_table_association" "vpce_rt_assoc" {
-  count           = local.az_count
-  route_table_id  = aws_route_table.private-rt[count.index].id
+  for_each        = toset(data.aws_availability_zones.with.names)
+  route_table_id  = aws_route_table.private-rt[each.key].id
   vpc_endpoint_id = aws_vpc_endpoint.s3.id
 }
 
 resource "aws_security_group" "public" {
-  name = "public-sg"
+  name        = "public-sg"
   description = "Allow SSH inbound traffic"
   vpc_id      = aws_vpc.main.id
 
@@ -154,7 +159,7 @@ resource "aws_security_group" "public" {
 }
 
 resource "aws_security_group" "db_app" {
-  name = "db-app-sg"
+  name        = "db-app-sg"
   description = "Allow 8000 inbound traffic from db load balancer and SSH from bastion"
   vpc_id      = aws_vpc.main.id
 
@@ -188,7 +193,7 @@ resource "aws_security_group" "db_app" {
 }
 
 resource "aws_security_group" "s3_app" {
-  name = "s3-app-sg"
+  name        = "s3-app-sg"
   description = "Allow 8000 inbound traffic from external load balancer and SSH from bastion"
   vpc_id      = aws_vpc.main.id
 
@@ -222,7 +227,7 @@ resource "aws_security_group" "s3_app" {
 }
 
 resource "aws_security_group" "db" {
-  name = "db-sg"
+  name        = "db-sg"
   description = "Allow 3306 inbound traffic from db app"
   vpc_id      = aws_vpc.main.id
 
@@ -248,7 +253,7 @@ resource "aws_security_group" "db" {
 }
 
 resource "aws_security_group" "db_lb" {
-  name = "db-lb"
+  name        = "db-lb"
   description = "Allow 8000 inbound traffic from s3 apps"
   vpc_id      = aws_vpc.main.id
 
@@ -273,7 +278,7 @@ resource "aws_security_group" "db_lb" {
 
 
 resource "aws_security_group" "external_lb" {
-  name = "external-lb"
+  name        = "external-lb"
   description = "Allow 80 inbound traffic from anywhere"
   vpc_id      = aws_vpc.main.id
 
