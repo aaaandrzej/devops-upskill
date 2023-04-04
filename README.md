@@ -24,6 +24,10 @@ S3_BUCKET_NAME=mybucket
 
 ### Running with terraform:
 
+Create an ssh key pair:
+
+`ssh-keygen -t rsa -b 4096`
+
 Example `terraforms.tfvars`:
 ```
 owner              = "me"
@@ -31,6 +35,7 @@ region             = "us-west-2"
 db_user     = "user"
 db_password = "pass"
 db_name     = "USERS"
+public_key = "PASTE_YOUR_PUBLIC_KEY_HERE"
 ```
 
 `cd terraform`
