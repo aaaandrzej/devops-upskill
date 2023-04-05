@@ -133,3 +133,4 @@ dmypy.json
 *terraform.tfstate*
 *.tfvars
 *.pem
+*.pub
