@@ -15,6 +15,9 @@ jobs:
     - name: 'Run terraform destroy'
       timeout-minutes: 20
       env:
+        TFSTATE_BUCKET: ${{ secrets.StateBucket }}
+        TFSTATE_KEY: ${{ secrets.StateKey
+        TFSTATE_REGION: ${{ secrets.Region }}
         TF_VAR_owner: ${{ secrets.Owner }}
         TF_VAR_db_name: ${{ secrets.DatabaseName }}
         TF_VAR_db_user: ${{ secrets.DatabaseUser }}

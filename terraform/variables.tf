@@ -24,6 +24,7 @@ variable "instance_size" {
   type    = string
   default = "t2.micro"
 }
+
 variable "public_key" {
   type = string
   sensitive = true

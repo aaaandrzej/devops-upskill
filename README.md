@@ -28,7 +28,11 @@ Create an ssh key pair:
 
 `ssh-keygen -t rsa -b 4096`
 
-Example `terraforms.tfvars`:
+Export env vars for storing the state file:
+
+`export TFSTATE_BUCKET=xxx && export TFSTATE_KEY=xxx && export TFSTATE_REGION=xxx`
+
+Example `terraforms.tfvars` (alternatively export them as env vars too as `TFVAR_OWNER`, etc.)
 ```
 owner              = "me"
 region             = "us-west-2"
