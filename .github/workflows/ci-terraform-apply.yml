@@ -26,6 +26,7 @@ jobs:
       with:
         path: |
           ~/.terraform.d/plugin-cache
+          ~/.terraform.lock.hcl
         key: ${{ runner.os }}-terraform-${{ hashFiles('**/.provider.tf') }}
         restore-keys: |
           ${{ runner.os }}-terraform-
