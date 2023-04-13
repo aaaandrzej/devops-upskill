@@ -21,8 +21,8 @@ jobs:
       with:
         path: |
           ~/.terraform.d/plugin-cache
-          ~/.terraform.lock.hcl
-        key: ${{ runner.os }}-terraform-${{ hashFiles('**/.provider.tf') }}
+          .terraform.lock.hcl
+        key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
         restore-keys: |
           ${{ runner.os }}-terraform-
     - name: 'Run terraform destroy'
