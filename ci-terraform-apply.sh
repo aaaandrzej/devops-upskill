@@ -2,6 +2,9 @@
 
 set -ex
 
+mkdir $HOME/.terraform.d/plugin-cache || true
+export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
+
 terraform -chdir=terraform init --reconfigure --input=false  \
  -backend-config="bucket=${TFSTATE_BUCKET}" \
  -backend-config="key=${TFSTATE_KEY}" \
