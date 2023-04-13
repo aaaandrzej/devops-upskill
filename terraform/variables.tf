@@ -26,6 +26,6 @@ variable "instance_size" {
 }
 
 variable "public_key" {
-  type = string
+  type      = string
   sensitive = true
 }

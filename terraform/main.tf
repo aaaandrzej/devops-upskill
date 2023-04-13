@@ -1,7 +1,30 @@
-module "networking" {
-  source = "./networking"
-  region = var.region
-  owner  = var.owner
+data "aws_availability_zones" "main" {
+  state         = "available"
+  exclude_names = ["${var.region}d", "${var.region}e"]
+}
+
+module "networking-public" {
+  source             = "./networking"
+  public             = true
+  public_sg_id       = null
+  external_lb_sg_id  = null
+  main_vpc_id        = null
+  public_subnets     = null
+  region             = var.region
+  availability_zones = data.aws_availability_zones.main.names
+  owner              = var.owner
+}
+
+module "networking-private" {
+  source             = "./networking"
+  public             = false
+  public_sg_id       = module.networking-public.public_sg_id
+  external_lb_sg_id  = module.networking-public.ext_lb_sg_id
+  main_vpc_id        = module.networking-public.vpc_id
+  public_subnets     = module.networking-public.subnets_ids
+  region             = var.region
+  availability_zones = data.aws_availability_zones.main.names
+  owner              = var.owner
 }
 
 module "database" {
@@ -9,8 +32,8 @@ module "database" {
   db_name                = var.db_name
   db_user                = var.db_user
   db_password            = var.db_password
-  vpc_security_group_ids = [module.networking.db_sg_id]
-  db_subnet_group_name   = module.networking.aws_db_subnet_group_name
+  vpc_security_group_ids = [module.networking-private.db_sg_id]
+  db_subnet_group_name   = module.networking-private.aws_db_subnet_group_name
   owner                  = var.owner
 }
 
@@ -24,9 +47,9 @@ module "loadbalancing-internal" {
   name           = "db-lb"
   internal       = true
   port           = 8000
-  vpc_id         = module.networking.vpc_id
-  security_group = module.networking.db_lb_sg_id
-  subnets        = module.networking.private_subnets_ids
+  vpc_id         = module.networking-public.vpc_id
+  security_group = module.networking-private.db_lb_sg_id
+  subnets        = module.networking-private.subnets_ids
   owner          = var.owner
 }
 
@@ -35,9 +58,9 @@ module "loadbalancing-external" {
   name           = "external"
   internal       = false
   port           = 80
-  vpc_id         = module.networking.vpc_id
-  security_group = module.networking.ext_lb_sg_id
-  subnets        = module.networking.public_subnets_ids
+  vpc_id         = module.networking-public.vpc_id
+  security_group = module.networking-public.ext_lb_sg_id
+  subnets        = module.networking-public.subnets_ids
   owner          = var.owner
 }
 
@@ -45,13 +68,13 @@ module "compute-db-apps" {
   source               = "./compute"
   app_name             = "db-app"
   instance_size        = var.instance_size
-  subnets              = module.networking.private_subnets_ids
+  subnets              = module.networking-private.subnets_ids
   key_name             = aws_key_pair.kp.id
-  desired_capacity     = module.networking.az_count
-  max_size             = module.networking.az_count
-  min_size             = module.networking.az_count
+  desired_capacity     = local.az_count
+  max_size             = local.az_count
+  min_size             = local.az_count
   app_dependency       = module.database.db
-  app_sg               = module.networking.db_app_sg_id
+  app_sg               = module.networking-private.db_app_sg_id
   iam_instance_profile = null
   tg_arn               = module.loadbalancing-internal.tg_arn
   owner                = var.owner
@@ -73,13 +96,13 @@ module "compute-s3-apps" {
   source               = "./compute"
   app_name             = "s3-app"
   instance_size        = var.instance_size
-  subnets              = module.networking.private_subnets_ids
+  subnets              = module.networking-private.subnets_ids
   key_name             = aws_key_pair.kp.id
-  desired_capacity     = 2 * module.networking.az_count
-  max_size             = 3 * module.networking.az_count
-  min_size             = 1 * module.networking.az_count
+  desired_capacity     = 2 * local.az_count
+  max_size             = 3 * local.az_count
+  min_size             = 1 * local.az_count
   app_dependency       = null
-  app_sg               = module.networking.s3_app_sg_id
+  app_sg               = module.networking-private.s3_app_sg_id
   iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
   tg_arn               = module.loadbalancing-external.tg_arn
   owner                = var.owner
@@ -98,8 +121,8 @@ resource "aws_instance" "bastion" {
   count           = 1
   ami             = module.compute-s3-apps.ec2_ami_id
   instance_type   = var.instance_size
-  subnet_id       = module.networking.public_subnets_ids[count.index]
-  security_groups = [module.networking.public_sg_id]
+  subnet_id       = module.networking-public.subnets_ids[count.index]
+  security_groups = [module.networking-public.public_sg_id]
   key_name        = aws_key_pair.kp.id
   tags = {
     Name  = join("-", [var.owner, "bastion", (count.index + 1)])

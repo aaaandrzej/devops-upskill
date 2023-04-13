@@ -1,8 +1,8 @@
 # devops-upskill
 
-## Two dummy APIs to practice AWS cloud services.
+## Highly available AWS infrastructure described with Terraform to host two dummy apps, created to practice AWS and Terraform.
 
-### Running locally/ manually:
+### Running apps locally/ manually:
 
 Example `.env` contents:
 ```
@@ -34,14 +34,12 @@ Export env vars for storing the state file:
 
 Example `terraforms.tfvars` (alternatively export them as env vars too as `TFVAR_OWNER`, etc.)
 ```
-owner              = "me"
-region             = "us-west-2"
+owner       = "me"
+region      = "us-west-2"
 db_user     = "user"
 db_password = "pass"
 db_name     = "USERS"
-public_key = "PASTE_YOUR_PUBLIC_KEY_HERE"
+public_key  = "PASTE_YOUR_PUBLIC_KEY_HERE"
 ```
 
-`cd terraform`
-
-`terraform apply`
+Run with `./ci-terraform-apply.sh`

@@ -1,43 +1,35 @@
 output "vpc_id" {
-  value = aws_vpc.main.id
+  value = length(aws_vpc.main) > 0 ? aws_vpc.main[0].id : null
 }
 
-output "az_count" {
-  value = local.az_count
-}
-
-output "private_subnets_ids" {
-  value = [for k, v in aws_subnet.private_subnets : v.id]
-}
-
-output "public_subnets_ids" {
-  value = [for k, v in aws_subnet.public_subnets : v.id]
+output "subnets_ids" {
+  value = [for k, v in aws_subnet.subnets : v.id]
 }
 
 output "aws_db_subnet_group_name" {
-  value = aws_db_subnet_group.default.name
+  value = length(aws_db_subnet_group.default) > 0 ? aws_db_subnet_group.default[0].name : null
 }
 
 output "db_app_sg_id" {
-  value = aws_security_group.db_app.id
+  value = length(aws_security_group.db_app) > 0 ? aws_security_group.db_app[0].id : 0
 }
 
 output "db_sg_id" {
-  value = aws_security_group.db.id
+  value = length(aws_security_group.db) > 0 ? aws_security_group.db[0].id : null
 }
 
 output "db_lb_sg_id" {
-  value = aws_security_group.db_lb.id
+  value = length(aws_security_group.db_lb) > 0 ? aws_security_group.db_lb[0].id : null
 }
 
 output "s3_app_sg_id" {
-  value = aws_security_group.s3_app.id
+  value = length(aws_security_group.s3_app) > 0 ? aws_security_group.s3_app[0].id : null
 }
 
 output "ext_lb_sg_id" {
-  value = aws_security_group.external_lb.id
+  value = length(aws_security_group.external_lb) > 0 ? aws_security_group.external_lb[0].id : null
 }
 
 output "public_sg_id" {
-  value = aws_security_group.public.id
+  value = length(aws_security_group.public) > 0 ? aws_security_group.public[0].id : null
 }
