@@ -19,27 +19,21 @@ jobs:
         fetch-depth: '1'
     - name: 'Set up Terraform cache dir'
       run: |
-        mkdir $HOME/.terraform.d/plugin-cache || true
+        mkdir -o $HOME/.terraform.d/plugin-cache
 #        export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
     - name: 'Echo TF_PLUGIN_CACHE_DIR'
       run: |
-        echo "$HOME/.terraform.d/plugin-cache"
+        echo $HOME/.terraform.d/plugin-cache
     - name: 'Cache Terraform'
       uses: actions/cache@v3
       with:
         path: |
-          ~/.terraform.d/plugin-cache
+          $HOME/.terraform.d/plugin-cache
         key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/providers.tf') }}
     - name: 'ls TF_PLUGIN_CACHE_DIR'
       run: |
-        echo ~/.terraform.d/plugin-cache
-        ls ~/.terraform.d/plugin-cache
-    - name: 'ls TF_PLUGIN_CACHE_DIR but from env var'
-      run: |
-        echo $TF_PLUGIN_CACHE_DIR
-        ls $TF_PLUGIN_CACHE_DIR || true
-        echo TF_PLUGIN_CACHE_DIR
-        ls TF_PLUGIN_CACHE_DIR || true
+        echo $HOME/.terraform.d/plugin-cache
+        ls $HOME/.terraform.d/plugin-cache
     - name: 'Run terraform plan'
       timeout-minutes: 20
       env:
@@ -59,5 +53,11 @@ jobs:
         ./ci-terraform-plan.sh
     - name: 'Echo & ls TF_PLUGIN_CACHE_DIR'
       run: |
-        echo ~/.terraform.d/plugin-cache
-        ls ~/.terraform.d/plugin-cache
+        echo $HOME/.terraform.d/plugin-cache
+        ls $HOME/.terraform.d/plugin-cache
+    - name: 'ls TF_PLUGIN_CACHE_DIR but from env var'
+      run: |
+        echo $TF_PLUGIN_CACHE_DIR
+        ls $TF_PLUGIN_CACHE_DIR || true
+        echo TF_PLUGIN_CACHE_DIR
+        ls TF_PLUGIN_CACHE_DIR || true
