@@ -35,8 +35,10 @@ jobs:
         ls ~/.terraform.d/plugin-cache
     - name: 'ls TF_PLUGIN_CACHE_DIR but from env var'
       run: |
-        echo $env:TF_PLUGIN_CACHE_DIR
-        ls $env:TF_PLUGIN_CACHE_DIR
+        echo $TF_PLUGIN_CACHE_DIR
+        ls $TF_PLUGIN_CACHE_DIR
+        echo TF_PLUGIN_CACHE_DIR
+        ls TF_PLUGIN_CACHE_DIR || true
     - name: 'Run terraform plan'
       timeout-minutes: 20
       env:
