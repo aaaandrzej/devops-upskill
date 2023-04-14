@@ -21,6 +21,9 @@ jobs:
     - name: 'Set up Terraform caching'
       run: |
         mkdir -p ~/.terraform.d/plugin-cache && export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
+    - name: 'Echo TF_PLUGIN_CACHE_DIR'
+      run: |
+        echo $TF_PLUGIN_CACHE_DIR
     - name: 'Cache Terraform'
       uses: actions/cache@v3
       with:

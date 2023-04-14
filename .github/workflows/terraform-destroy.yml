@@ -25,6 +25,9 @@ jobs:
         key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
         restore-keys: |
           ${{ runner.os }}-terraform-
+    - name: 'Echo TF_PLUGIN_CACHE_DIR'
+      run: |
+        echo $TF_PLUGIN_CACHE_DIR
     - name: 'Run terraform destroy'
       timeout-minutes: 20
       env:
