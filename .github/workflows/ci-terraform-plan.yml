@@ -9,31 +9,31 @@ jobs:
   terraform-plan:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      TF_PLUGIN_CACHE_DIR: "$HOME/.terraform.d/plugin-cache"
+#    env:
+#      TF_PLUGIN_CACHE_DIR: "$HOME/.terraform.d/plugin-cache"
     steps:
     - name: 'Checkout main'
       uses: actions/checkout@v3
       with:
         ref: 'main'
         fetch-depth: '1'
-    - name: 'Set up Terraform cache dir'
+    - name: 'Config Terraform plugin cache'
       run: |
-        mkdir -p $HOME/.terraform.d/plugin-cache
-#        export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
-    - name: 'Echo TF_PLUGIN_CACHE_DIR'
+        echo 'plugin_cache_dir="$HOME/.terraform.d/plugin-cache"' >~/.terraformrc
+        mkdir --parents ~/.terraform.d/plugin-cache
+    - name: 'cat ~/.terraformrc'
       run: |
-        echo $HOME/.terraform.d/plugin-cache
+        cat ~/.terraformrc
+    - name: 'Echo & ls "$HOME/.terraform.d/plugin-cache"'
+      run: |
+        echo "$HOME/.terraform.d/plugin-cache"
+        ls "$HOME/.terraform.d/plugin-cache"
     - name: 'Cache Terraform'
       uses: actions/cache@v3
       with:
         path: |
-          $HOME/.terraform.d/plugin-cache
+          ~/.terraform.d/plugin-cache
         key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/providers.tf') }}
-    - name: 'ls TF_PLUGIN_CACHE_DIR'
-      run: |
-        echo $HOME/.terraform.d/plugin-cache
-        ls $HOME/.terraform.d/plugin-cache
     - name: 'Run terraform plan'
       timeout-minutes: 20
       env:
@@ -51,13 +51,7 @@ jobs:
         AWS_DEFAULT_OUTPUT: 'json'
       run: |
         ./ci-terraform-plan.sh
-    - name: 'Echo & ls TF_PLUGIN_CACHE_DIR'
+    - name: 'Echo & ls "$HOME/.terraform.d/plugin-cache"'
       run: |
-        echo $HOME/.terraform.d/plugin-cache
-        ls $HOME/.terraform.d/plugin-cache
-    - name: 'ls TF_PLUGIN_CACHE_DIR but from env var'
-      run: |
-        echo $TF_PLUGIN_CACHE_DIR
-        ls $TF_PLUGIN_CACHE_DIR || true
-        echo TF_PLUGIN_CACHE_DIR
-        ls TF_PLUGIN_CACHE_DIR || true
+        echo "$HOME/.terraform.d/plugin-cache"
+        ls "$HOME/.terraform.d/plugin-cache"
