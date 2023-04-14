@@ -2,7 +2,7 @@
 
 set -ex
 
-terraform -chdir=terraform init --reconfigure --input=false  \
+terraform -chdir=terraform init --input=false  \
  -backend-config="bucket=${TFSTATE_BUCKET}" \
  -backend-config="key=${TFSTATE_KEY}" \
  -backend-config="region=${TFSTATE_REGION}"
