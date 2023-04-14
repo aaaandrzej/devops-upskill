@@ -7,6 +7,8 @@ jobs:
   terraform-destroy-aws-from-main:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      TF_PLUGIN_CACHE_DIR: $HOME/.terraform.d/plugin-cache
     steps:
     - name: 'Checkout main'
       uses: actions/checkout@v3
@@ -15,7 +17,7 @@ jobs:
         fetch-depth: '1'
     - name: 'Set up Terraform Caching'
       run: |
-        mkdir -p ~/.terraform.d/plugin-cache && export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
+        mkdir -p ~/.terraform.d/plugin-cache
     - name: 'Cache Terraform'
       uses: actions/cache@v3
       with:

@@ -12,6 +12,8 @@ jobs:
     if: github.event.pull_request.merged || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      TF_PLUGIN_CACHE_DIR: $HOME/.terraform.d/plugin-cache
     steps:
     - name: 'Checkout main'
       uses: actions/checkout@v3
@@ -20,7 +22,7 @@ jobs:
         fetch-depth: '1'
     - name: 'Set up Terraform caching'
       run: |
-        mkdir -p ~/.terraform.d/plugin-cache && export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
+        mkdir -p ~/.terraform.d/plugin-cache
     - name: 'Echo TF_PLUGIN_CACHE_DIR'
       run: |
         echo $TF_PLUGIN_CACHE_DIR
