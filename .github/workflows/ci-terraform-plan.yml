@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      TF_PLUGIN_CACHE_DIR: $HOME/.terraform.d/plugin-cache
+      TF_PLUGIN_CACHE_DIR: /home/runner/work/_temp/_github_home/.terraform.d/plugin-cache
     steps:
     - name: 'Checkout main'
       uses: actions/checkout@v3
@@ -19,7 +19,7 @@ jobs:
         fetch-depth: '1'
     - name: 'Set up Terraform cache dir'
       run: |
-        mkdir -p $HOME/.terraform.d/plugin-cache
+        mkdir -p /home/runner/work/_temp/_github_home/.terraform.d/plugin-cache
     - name: 'Echo TF_PLUGIN_CACHE_DIR'
       run: |
         echo $TF_PLUGIN_CACHE_DIR
@@ -27,7 +27,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: |
-          ${{ runner.temp }}/_github_home/.terraform.d/plugin-cache
+          /home/runner/work/_temp/_github_home/.terraform.d/plugin-cache
         key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
     - name: 'Run terraform plan'
       timeout-minutes: 20
