@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      TF_PLUGIN_CACHE_DIR: /home/runner/work/_temp/_github_home/.terraform.d/plugin-cache
+      TF_PLUGIN_CACHE_DIR: $HO
     steps:
     - name: 'Checkout main'
       uses: actions/checkout@v3
@@ -25,7 +25,8 @@ jobs:
         mkdir -p /home/runner/work/_temp/_github_home/.terraform.d/plugin-cache
     - name: 'Echo & ls TF_PLUGIN_CACHE_DIR'
       run: |
-        echo $TF_PLUGIN_CACHE_DIR && ls $TF_PLUGIN_CACHE_DIR
+        echo $TF_PLUGIN_CACHE_DIR 
+        ls $TF_PLUGIN_CACHE_DIR
     - name: 'Cache Terraform'
       uses: actions/cache@v3
       with:
