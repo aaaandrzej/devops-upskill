@@ -6,7 +6,7 @@ on:
       - '*'
 
 jobs:
-  terraform-destroy-aws-from-main:
+  terraform-plan:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -20,16 +20,19 @@ jobs:
     - name: 'Set up Terraform cache dir'
       run: |
         mkdir -p .terraform.d/plugin-cache
-    - name: 'Echo & ls TF_PLUGIN_CACHE_DIR'
+    - name: 'Echo TF_PLUGIN_CACHE_DIR'
       run: |
         echo $TF_PLUGIN_CACHE_DIR
-        ls $TF_PLUGIN_CACHE_DIR
     - name: 'Cache Terraform'
       uses: actions/cache@v3
       with:
         path: |
           .terraform.d/plugin-cache
         key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/providers.tf') }}
+    - name: 'ls TF_PLUGIN_CACHE_DIR'
+      run: |
+        echo $TF_PLUGIN_CACHE_DIR
+        ls $TF_PLUGIN_CACHE_DIR
     - name: 'Run terraform plan'
       timeout-minutes: 20
       env:
@@ -47,3 +50,7 @@ jobs:
         AWS_DEFAULT_OUTPUT: 'json'
       run: |
         ./ci-terraform-plan.sh
+    - name: 'Echo & ls TF_PLUGIN_CACHE_DIR'
+      run: |
+        echo $TF_PLUGIN_CACHE_DIR
+        ls $TF_PLUGIN_CACHE_DIR
