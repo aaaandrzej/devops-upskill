@@ -4,29 +4,32 @@ on:
   workflow_dispatch:
 
 jobs:
-  terraform-destroy-aws-from-main:
+  terraform-destroy:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      TF_PLUGIN_CACHE_DIR: /home/runner/work/_temp/_github_home/.terraform.d/plugin-cache
     steps:
     - name: 'Checkout main'
       uses: actions/checkout@v3
       with:
         ref: 'main'
         fetch-depth: '1'
-    - name: 'Set up Terraform cache dir'
+    - name: 'Config Terraform plugin cache'
       run: |
-        mkdir -p /home/runner/work/_temp/_github_home/.terraform.d/plugin-cache
-    - name: 'Echo & ls TF_PLUGIN_CACHE_DIR'
+        echo 'plugin_cache_dir="$HOME/.terraform.d/plugin-cache"' >~/.terraformrc
+        mkdir --parents ~/.terraform.d/plugin-cache
+    - name: 'cat ~/.terraformrc'
       run: |
-        echo $TF_PLUGIN_CACHE_DIR && ls $TF_PLUGIN_CACHE_DIR
+        cat ~/.terraformrc
+    - name: 'Echo & ls "$HOME/.terraform.d/plugin-cache"'
+      run: |
+        echo "$HOME/.terraform.d/plugin-cache"
+        ls "$HOME/.terraform.d/plugin-cache"
     - name: 'Cache Terraform'
       uses: actions/cache@v3
       with:
         path: |
-          /home/runner/work/_temp/_github_home/.terraform.d/plugin-cache
-        key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
+          ~/.terraform.d/plugin-cache
+        key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/providers.tf') }}
     - name: 'Run terraform destroy'
       timeout-minutes: 20
       env:
@@ -44,3 +47,7 @@ jobs:
         AWS_DEFAULT_OUTPUT: 'json'
       run: |
         ./ci-terraform-destroy.sh
+    - name: 'Echo & ls "$HOME/.terraform.d/plugin-cache"'
+      run: |
+        echo "$HOME/.terraform.d/plugin-cache"
+        ls "$HOME/.terraform.d/plugin-cache"
