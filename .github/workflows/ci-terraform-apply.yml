@@ -17,10 +17,16 @@ jobs:
       with:
         ref: 'main'
         fetch-depth: '1'
-    - name: 'Config Terraform plugin cache'
+    - name: 'Configure Terraform plugin cache'
       run: |
         echo 'plugin_cache_dir="$HOME/.terraform.d/plugin-cache"' >~/.terraformrc
         mkdir --parents ~/.terraform.d/plugin-cache
+    - name: 'Cache Terraform'
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.terraform.d/plugin-cache
+        key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/providers.tf') }}
     - name: 'cat ~/.terraformrc'
       run: |
         cat ~/.terraformrc
@@ -28,12 +34,6 @@ jobs:
       run: |
         echo "$HOME/.terraform.d/plugin-cache"
         ls "$HOME/.terraform.d/plugin-cache"
-    - name: 'Cache Terraform'
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.terraform.d/plugin-cache
-        key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/providers.tf') }}
     - name: 'Run terraform apply'
       timeout-minutes: 20
       env:
