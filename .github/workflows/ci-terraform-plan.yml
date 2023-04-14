@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      TF_PLUGIN_CACHE_DIR: ~/.terraform.d/plugin-cache
+      TF_PLUGIN_CACHE_DIR: "$HOME/.terraform.d/plugin-cache"
     steps:
     - name: 'Checkout main'
       uses: actions/checkout@v3
@@ -19,10 +19,11 @@ jobs:
         fetch-depth: '1'
     - name: 'Set up Terraform cache dir'
       run: |
-        mkdir -p ~/.terraform.d/plugin-cache
+        mkdir $HOME/.terraform.d/plugin-cache || true
+#        export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
     - name: 'Echo TF_PLUGIN_CACHE_DIR'
       run: |
-        echo ~/.terraform.d/plugin-cache
+        echo "$HOME/.terraform.d/plugin-cache"
     - name: 'Cache Terraform'
       uses: actions/cache@v3
       with:
@@ -36,7 +37,7 @@ jobs:
     - name: 'ls TF_PLUGIN_CACHE_DIR but from env var'
       run: |
         echo $TF_PLUGIN_CACHE_DIR
-        ls $TF_PLUGIN_CACHE_DIR
+        ls $TF_PLUGIN_CACHE_DIR || true
         echo TF_PLUGIN_CACHE_DIR
         ls TF_PLUGIN_CACHE_DIR || true
     - name: 'Run terraform plan'
