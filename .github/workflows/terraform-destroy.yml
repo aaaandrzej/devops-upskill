@@ -8,28 +8,26 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      TF_PLUGIN_CACHE_DIR: $HOME/.terraform.d/plugin-cache
+      TF_PLUGIN_CACHE_DIR: /home/runner/work/_temp/_github_home/.terraform.d/plugin-cache
     steps:
     - name: 'Checkout main'
       uses: actions/checkout@v3
       with:
         ref: 'main'
         fetch-depth: '1'
-    - name: 'Set up Terraform Caching'
+    - name: 'Set up Terraform cache dir'
       run: |
-        mkdir -p ~/.terraform.d/plugin-cache
+        mkdir -p /home/runner/work/_temp/_github_home/.terraform.d/plugin-cache
+    - name: 'Echo & ls TF_PLUGIN_CACHE_DIR'
+      run: |
+        echo $TF_PLUGIN_CACHE_DIR
+        ls $TF_PLUGIN_CACHE_DIR
     - name: 'Cache Terraform'
       uses: actions/cache@v3
       with:
         path: |
-          ~/.terraform.d/plugin-cache
-          terraform/.terraform.lock.hcl
+          /home/runner/work/_temp/_github_home/.terraform.d/plugin-cache
         key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
-        restore-keys: |
-          ${{ runner.os }}-terraform-
-    - name: 'Echo TF_PLUGIN_CACHE_DIR'
-      run: |
-        echo $TF_PLUGIN_CACHE_DIR
     - name: 'Run terraform destroy'
       timeout-minutes: 20
       env:
