@@ -132,5 +132,7 @@ dmypy.json
 .terraform
 *terraform.tfstate*
 *.tfvars
+*.tfbackend
+.terraform.lock.hcl
 *.pem
 *.pub
