@@ -16,4 +16,5 @@ variable "min_size" { type = number }
 variable "app_dependency" {}
 variable "subnets" {}
 variable "tg_arn" {}
+variable "image_id" {}
 variable "owner" {}

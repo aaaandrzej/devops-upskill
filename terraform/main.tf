@@ -3,6 +3,22 @@ data "aws_availability_zones" "main" {
   exclude_names = ["${var.region}d", "${var.region}e"]
 }
 
+data "aws_ami" "ubuntu" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["099720109477"] # Canonical
+}
+
 module "networking-public" {
   source             = "./networking"
   public             = true
@@ -67,6 +83,7 @@ module "loadbalancing-external" {
 module "compute-db-apps" {
   source               = "./compute"
   app_name             = "db-app"
+  image_id             = data.aws_ami.ubuntu.id
   instance_size        = var.instance_size
   subnets              = module.networking-private.subnets_ids
   key_name             = aws_key_pair.kp.id
@@ -95,6 +112,7 @@ module "compute-db-apps" {
 module "compute-s3-apps" {
   source               = "./compute"
   app_name             = "s3-app"
+  image_id             = data.aws_ami.ubuntu.id
   instance_size        = var.instance_size
   subnets              = module.networking-private.subnets_ids
   key_name             = aws_key_pair.kp.id
@@ -119,7 +137,7 @@ module "compute-s3-apps" {
 
 resource "aws_instance" "bastion" {
   count           = 1
-  ami             = module.compute-s3-apps.ec2_ami_id
+  ami             = data.aws_ami.ubuntu.id
   instance_type   = var.instance_size
   subnet_id       = module.networking-public.subnets_ids[count.index]
   security_groups = [module.networking-public.public_sg_id]
