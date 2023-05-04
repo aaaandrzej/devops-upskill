@@ -18,9 +18,11 @@ APP_DB_URL=http://${APP_DB_HOST}:${APP_DB_PORT}/getNoOfRecs
 S3_BUCKET_NAME=mybucket
 ```
 
-`uvicorn src/app-db:app --port 8000 --reload`
+`cd src`
 
-`uvicorn src/app-s3:app --port 8001 --reload`
+`uvicorn app-db:app --port 8000 --reload`
+
+`uvicorn app-s3:app --port 8001 --reload`
 
 ### Running with terraform:
 
